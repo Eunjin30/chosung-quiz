@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>초성 단어 마스터! 3단어 퀴즈 챌린지</title>
+  <!-- Tailwind CSS CDN 로드 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 구글 폰트: Jua (제목) & Noto Sans KR (본문) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            title: ['Jua', 'sans-serif'],
+            sans: ['Noto Sans KR', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              cream: '#FFFBEB',
+              yellow: '#FDE047',
+              amber: '#F59E0B',
+              orange: '#FB923C',
+              coral: '#F43F5E',
+              sky: '#0284C7',
+              indigo: '#4F46E5',
+              emerald: '#10B981',
+            }
+          },
+          keyframes: {
+            gentleBounce: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' }
+            },
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '20%, 60%': { transform: 'translateX(-7px)' },
+              '40%, 80%': { transform: 'translateX(7px)' }
+            },
+            popScale: {
+              '0%': { transform: 'scale(0.88)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' }
+            }
+          },
+          animation: {
+            gentleBounce: 'gentleBounce 2s infinite ease-in-out',
+            shake: 'shake 0.38s ease-in-out',
+            popScale: 'popScale 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-title {
+      font-family: 'Jua', sans-serif;
+    }
+    input {
+      user-select: auto;
+    }
+    ::-webkit-scrollbar {
+      width: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-amber-100 via-orange-50 to-emerald-100 min-h-screen text-slate-800 flex flex-col justify-between items-center p-3 md:p-6">
+
+  <!-- 상단 헤더 네비게이션 -->
+  <header class="w-full max-w-2xl flex items-center justify-between py-2 md:py-3 px-1">
+    <div class="flex items-center gap-2.5">
+      <div class="w-11 h-11 bg-white rounded-2xl shadow-sm border-2 border-amber-200 flex items-center justify-center text-2xl animate-gentleBounce">
+        🧩
+      </div>
+      <div>
+        <h1 class="font-title text-2xl md:text-3xl text-amber-900 tracking-wide flex items-center gap-1.5">
+          초성 3단어 <span class="text-orange-600">마스터</span>
+        </h1>
+        <p class="text-[11px] md:text-xs text-amber-800 font-bold">초성을 보고 서로 다른 단어 3개를 찾아라!</p>
+      </div>
+    </div>
+
+    <!-- 헤더 우측 컨트롤 (성공 목표 배지 + 소리 버튼) -->
+    <div class="flex items-center gap-2">
+      <div class="bg-white/90 border border-amber-200 px-3 py-1.5 rounded-2xl shadow-sm text-xs font-bold text-amber-900 flex items-center gap-1.5">
+        <span>성공 목표:</span>
+        <span id="headerScoreBadge" class="text-orange-600 font-black text-sm">0 / 10</span>
+      </div>
+      <button id="soundToggleBtn" class="bg-white/90 border border-amber-200 text-amber-900 p-2.5 rounded-2xl shadow-sm hover:bg-amber-50 active:scale-95 transition text-sm" title="소리 켜기/끄기">
+        <span id="soundIcon">🔊</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 인터랙티브 컨테이너 -->
+  <main class="w-full max-w-2xl flex-1 flex flex-col justify-center my-2">
+
+    <!-- 1. 시작 화면 (Start Screen) -->
+    <section id="startScreen" class="bg-white/95 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-xl border-4 border-amber-200 flex flex-col items-center text-center animate-popScale">
+      <div class="w-24 h-24 bg-gradient-to-tr from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center text-5xl mb-4 shadow-lg shadow-amber-200 text-white animate-gentleBounce">
+        ✨
+      </div>
+
+      <span class="bg-amber-100 text-amber-900 text-xs md:text-sm font-extrabold px-3.5 py-1 rounded-full mb-2 border border-amber-200">
+        초등 4~6학년 어휘력·사고력 쑥쑥 프로젝트
+      </span>
+      <h2 class="font-title text-3xl md:text-4xl text-slate-800 mb-2">
+        10문제 3단어 정답 챌린지! 🔥
+      </h2>
+      <p class="text-slate-600 text-sm md:text-base max-w-md mb-6 leading-relaxed">
+        제시되는 초성(예: <strong class="text-orange-600">ㄱ ㅂ</strong>)에 맞는<br>
+        <strong class="text-indigo-600">서로 다른 우리말 단어 3개</strong>를 빈칸에 적어보세요!<br>
+        총 <strong class="text-amber-600">10문제를 완성</strong>하면 초성 단어 마스터 칭호를 받습니다!
+      </p>
+
+      <!-- 규칙 안내 카드 -->
+      <div class="grid grid-cols-3 gap-2.5 w-full max-w-md mb-6 text-left">
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-center">
+          <div class="text-xl mb-1 font-title text-amber-600">3개 단어</div>
+          <div class="font-bold text-xs text-amber-900">서로 다르게!</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">중복 입력 금지</div>
+        </div>
+        <div class="bg-orange-50 border border-orange-200 rounded-2xl p-3 text-center">
+          <div class="text-xl mb-1 font-title text-orange-600">초성 검증</div>
+          <div class="font-bold text-xs text-orange-900">정확한 초성</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">자음 실시간 분석</div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center">
+          <div class="text-xl mb-1 font-title text-emerald-600">10문제 달성</div>
+          <div class="font-bold text-xs text-emerald-900">마스터 등극</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">30단어 사전 수여</div>
+        </div>
+      </div>
+
+      <!-- 아바타 캐릭터 선택 -->
+      <div class="w-full max-w-md mb-6">
+        <label class="block text-xs md:text-sm font-bold text-slate-700 mb-2">도전할 캐릭터 선택</label>
+        <div class="grid grid-cols-4 gap-2.5" id="avatarSelector">
+          <button type="button" data-avatar="🦊" class="avatar-btn p-3 text-3xl rounded-2xl border-2 border-orange-500 bg-orange-50 shadow-sm transition transform hover:scale-105 active:scale-95">🦊</button>
+          <button type="button" data-avatar="🐯" class="avatar-btn p-3 text-3xl rounded-2xl border-2 border-slate-200 bg-slate-50 transition transform hover:scale-105 active:scale-95">🐯</button>
+          <button type="button" data-avatar="🐰" class="avatar-btn p-3 text-3xl rounded-2xl border-2 border-slate-200 bg-slate-50 transition transform hover:scale-105 active:scale-95">🐰</button>
+          <button type="button" data-avatar="🐼" class="avatar-btn p-3 text-3xl rounded-2xl border-2 border-slate-200 bg-slate-50 transition transform hover:scale-105 active:scale-95">🐼</button>
+        </div>
+      </div>
+
+      <!-- 퀴즈 도전 시작 버튼 -->
+      <button id="startQuizBtn" class="w-full max-w-md bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 hover:from-orange-600 hover:to-amber-600 text-white font-title text-2xl py-4 rounded-2xl shadow-lg hover:shadow-orange-200 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+        <span>초성 3단어 퀴즈 시작!</span>
+        <span>🚀</span>
+      </button>
+    </section>
+
+    <!-- 2. 퀴즈 화면 (Quiz Screen) -->
+    <section id="quizScreen" class="hidden bg-white/95 backdrop-blur-md rounded-3xl p-4 md:p-6 shadow-xl border-4 border-amber-200 flex flex-col animate-popScale">
+
+      <!-- 상단 현황판: 10단계 구슬 & 프로그레스 바 -->
+      <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-3.5 mb-3 border border-amber-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span id="playerAvatar" class="text-2xl">🦊</span>
+            <span class="font-title text-base md:text-lg text-slate-800">
+              맞힌 문제: <span id="currentScoreNum" class="text-orange-600 text-xl font-black">0</span> / 10
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="progressCheer" class="text-xs font-extrabold text-orange-800 bg-orange-100 border border-orange-300 px-2.5 py-1 rounded-full animate-gentleBounce">
+              10문제 정답을 향해 출발! 🚀
+            </span>
+          </div>
+        </div>
+
+        <!-- 10단계 인디케이터 구슬 -->
+        <div class="grid grid-cols-10 gap-1 md:gap-1.5 pt-1" id="scoreNodesContainer">
+          <!-- 1~10 구슬 JS 렌더링 -->
+        </div>
+
+        <!-- 게이지 바 -->
+        <div class="w-full bg-slate-200 rounded-full h-2.5 mt-2.5 overflow-hidden">
+          <div id="quizProgressBar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-2.5 rounded-full transition-all duration-300 w-0"></div>
+        </div>
+      </div>
+
+      <!-- 문제 카드 영역 -->
+      <div class="bg-slate-50 border-2 border-amber-100 rounded-2xl p-4 md:p-5 mb-3 text-center flex flex-col items-center relative overflow-hidden">
+        
+        <!-- 카테고리 태그 & 글자 수 배지 -->
+        <div class="w-full flex items-center justify-between mb-3 px-1">
+          <span id="categoryBadge" class="bg-amber-100 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full border border-amber-200">
+            일상과 사물
+          </span>
+          <span id="charCountBadge" class="bg-orange-100 text-orange-800 text-xs font-black px-3 py-1 rounded-full border border-orange-300">
+            2글자 단어
+          </span>
+        </div>
+
+        <p class="text-xs text-slate-500 font-bold mb-1">다음 초성에 맞는 서로 다른 단어 3개를 찾아보세요!</p>
+
+        <!-- 초대형 초성 디스플레이 -->
+        <div id="bigChosungDisplay" class="flex items-center justify-center gap-2 md:gap-3 py-2 my-1">
+          <!-- JS로 동적 생성되는 초성 블록들 -->
+        </div>
+
+        <!-- 힌트 열기 버튼 -->
+        <div class="mt-2 flex items-center justify-center gap-2">
+          <button id="hintToggleBtn" type="button" class="text-xs text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-3.5 py-1.5 rounded-full transition active:scale-95 flex items-center gap-1.5 border border-amber-300 shadow-sm">
+            💡 <span>연상 힌트 보기</span>
+          </button>
+        </div>
+
+        <!-- 연상 힌트 안내 상자 -->
+        <div id="hintContentBox" class="hidden mt-2.5 text-xs md:text-sm text-slate-700 bg-amber-50/90 border border-amber-300 px-4 py-2.5 rounded-xl text-left leading-relaxed w-full animate-popScale">
+          💡 <span id="hintText" class="font-medium">힌트 내용이 표시됩니다.</span>
+        </div>
+      </div>
+
+      <!-- 3개 단어 입력 폼 -->
+      <form id="wordAnswerForm" class="w-full flex flex-col gap-2.5" onsubmit="return false;">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          
+          <!-- 단어 1 입력창 -->
+          <div class="relative flex flex-col">
+            <label class="text-[11px] font-bold text-slate-500 mb-1 ml-1 flex items-center justify-between">
+              <span>첫 번째 단어</span>
+              <span id="word1Status" class="text-[10px] text-slate-400">대기 중</span>
+            </label>
+            <input 
+              type="text" 
+              id="wordInput1" 
+              placeholder="예: 가방" 
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full bg-white border-2 border-slate-300 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 rounded-2xl py-3 px-3.5 text-base md:text-lg font-bold text-slate-800 transition outline-none shadow-sm text-center"
+            />
+          </div>
+
+          <!-- 단어 2 입력창 -->
+          <div class="relative flex flex-col">
+            <label class="text-[11px] font-bold text-slate-500 mb-1 ml-1 flex items-center justify-between">
+              <span>두 번째 단어</span>
+              <span id="word2Status" class="text-[10px] text-slate-400">대기 중</span>
+            </label>
+            <input 
+              type="text" 
+              id="wordInput2" 
+              placeholder="예: 김밥" 
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full bg-white border-2 border-slate-300 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 rounded-2xl py-3 px-3.5 text-base md:text-lg font-bold text-slate-800 transition outline-none shadow-sm text-center"
+            />
+          </div>
+
+          <!-- 단어 3 입력창 -->
+          <div class="relative flex flex-col">
+            <label class="text-[11px] font-bold text-slate-500 mb-1 ml-1 flex items-center justify-between">
+              <span>세 번째 단어</span>
+              <span id="word3Status" class="text-[10px] text-slate-400">대기 중</span>
+            </label>
+            <input 
+              type="text" 
+              id="wordInput3" 
+              placeholder="예: 갈비" 
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full bg-white border-2 border-slate-300 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 rounded-2xl py-3 px-3.5 text-base md:text-lg font-bold text-slate-800 transition outline-none shadow-sm text-center"
+            />
+          </div>
+
+        </div>
+
+        <!-- 단어 제출 버튼 -->
+        <button 
+          type="submit" 
+          id="submitWordsBtn"
+          class="w-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 hover:from-orange-600 hover:to-amber-600 text-white font-title text-xl py-3.5 rounded-2xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 mt-1">
+          <span>3개 단어 정답 확인!</span>
+          <span>↵</span>
+        </button>
+
+        <p class="text-[11px] md:text-xs text-slate-400 font-medium px-2 flex items-center justify-between">
+          <span>💡 Enter 키를 누르면 다음 칸으로 자동 이동합니다.</span>
+          <span class="text-slate-500">세 단어 모두 초성이 일치해야 해요!</span>
+        </p>
+      </form>
+
+      <!-- 검증 오류 알림 배너 -->
+      <div id="validationAlertBanner" class="hidden rounded-2xl p-3 mt-2 bg-rose-50 border-2 border-rose-300 animate-shake flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚠️</span>
+          <span class="text-xs md:text-sm font-bold text-rose-800" id="validationAlertText">
+            입력된 단어를 확인해주세요!
+          </span>
+        </div>
+        <button id="closeAlertBtn" class="text-rose-500 hover:text-rose-700 text-sm font-bold px-2">✕</button>
+      </div>
+
+    </section>
+
+    <!-- 3. 정답 통과 축하 모달 -->
+    <div id="roundSuccessModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-popScale">
+      <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border-4 border-amber-200 text-center flex flex-col items-center">
+        
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center text-4xl mb-3 shadow-inner">
+          🎉
+        </div>
+
+        <span class="bg-emerald-100 text-emerald-800 text-xs font-black px-3.5 py-1 rounded-full mb-1 border border-emerald-300">
+          딩동댕! 3단어 정답 통과
+        </span>
+
+        <h3 class="font-title text-2xl md:text-3xl text-slate-900 mb-1" id="roundSuccessTitle">
+          멋진 어휘력이에요!
+        </h3>
+
+        <!-- 입력한 단어 3개 확인 카드 -->
+        <div class="w-full bg-amber-50 border border-amber-200 rounded-2xl p-3.5 my-3 text-left">
+          <div class="text-xs text-amber-900 font-bold mb-1.5 flex items-center justify-between">
+            <span>내가 찾아낸 3단어</span>
+            <span id="roundChosungTag" class="text-orange-600 font-black">초성: ㄱ ㅂ</span>
+          </div>
+          <div id="roundAnswerWordsDisplay" class="flex flex-wrap gap-2 text-sm font-bold text-slate-800">
+            <!-- JS로 입력 단어 태그 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 추가 예시 단어 배너 -->
+        <div class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left text-xs mb-4">
+          <span class="font-bold text-slate-600">💡 이런 단어도 있어요:</span>
+          <span id="roundExampleWordsText" class="text-slate-800 font-semibold ml-1">가방, 김밥, 갈비, 국밥, 거북</span>
+        </div>
+
+        <!-- 다음 문제 이동 버튼 -->
+        <button id="modalNextQuestionBtn" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-title text-xl py-3.5 rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <span id="modalNextBtnText">다음 문제로 가기</span>
+          <span>➔</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. 10문제 완성 대성공 화면 (Final Success Screen) -->
+    <section id="finalSuccessScreen" class="hidden bg-white/95 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-yellow-300 flex flex-col items-center text-center animate-popScale relative">
+      <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+      <div class="w-24 h-24 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-3xl flex items-center justify-center text-6xl mb-3 shadow-lg shadow-yellow-200 animate-gentleBounce text-white">
+        👑
+      </div>
+
+      <span class="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs md:text-sm font-extrabold px-4 py-1.5 rounded-full mb-2 shadow-sm">
+        미션 완수! 10문제 30단어 정복!
+      </span>
+      <h2 class="font-title text-3xl md:text-4xl text-slate-800 mb-1">
+        축하합니다! 전설의 초성 단어 마스터!
+      </h2>
+      <p class="text-slate-600 text-sm md:text-base max-w-md mb-6 leading-relaxed">
+        어려운 초성 속에서도 풍부한 우리말 단어 30개를 멋지게 완성했어요!<br>
+        국어 실력과 순발력이 정말 뛰어납니다! 🎖️
+      </p>
+
+      <!-- 성과 통계 카드 -->
+      <div class="grid grid-cols-3 gap-3 w-full max-w-md bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
+        <div class="flex flex-col items-center">
+          <span class="text-xs text-slate-500 font-bold">완성 문제</span>
+          <span class="font-title text-2xl md:text-3xl text-orange-600 mt-1">10 / 10 🎯</span>
+        </div>
+        <div class="flex flex-col items-center border-x border-amber-200">
+          <span class="text-xs text-slate-500 font-bold">찾아낸 단어</span>
+          <span class="font-title text-2xl md:text-3xl text-indigo-600 mt-1">30단어 📚</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-xs text-slate-500 font-bold">소요 시간</span>
+          <span id="finalElapsedTime" class="font-title text-2xl md:text-3xl text-emerald-600 mt-1">02:30</span>
+        </div>
+      </div>
+
+      <!-- 액션 버튼 -->
+      <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+        <button id="restartChallengeBtn" class="flex-1 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 hover:from-orange-600 hover:to-amber-600 text-white font-title text-lg py-3.5 rounded-2xl shadow transition active:scale-95">
+          🎉 새로운 10문제 또 풀기!
+        </button>
+        <button id="toggleWordDictionaryBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-title text-lg py-3.5 px-4 rounded-2xl shadow-sm transition active:scale-95">
+          📜 나만의 30단어 사전
+        </button>
+      </div>
+
+      <!-- 30개 단어 사전 토글 영역 -->
+      <div id="wordDictionaryContainer" class="hidden w-full max-w-md text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 mt-4 max-h-64 overflow-y-auto">
+        <h4 class="font-bold text-xs text-slate-700 mb-2 border-b pb-1.5 flex justify-between">
+          <span>내가 완성한 10문제 초성 단어 목록</span>
+          <span class="text-orange-600 font-black">총 30개 완료 ✅</span>
+        </h4>
+        <div id="wordDictionaryList" class="space-y-2 text-xs">
+          <!-- JS 동적 렌더링 -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 하단 푸터 -->
+  <footer class="w-full max-w-2xl text-center py-2 text-xs text-slate-500 font-medium">
+    초등학교 4~6학년 대상 • 초성 단어 마스터 10문제 퀴즈 챌린지
+  </footer>
+
+  <script>
+    /* ==========================================================
+       1. Web Audio API 내장 사운드 엔진
+       ========================================================== */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playClick() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.06);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.06);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.06);
+        } catch (e) {}
+      }
+
+      playCorrect() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const notes = [523.25, 659.25, 783.99, 1046.50]; // 도-미-솔-높은도
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.07);
+            gain.gain.setValueAtTime(0.18, this.ctx.currentTime + idx * 0.07);
+            gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + idx * 0.07 + 0.22);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + idx * 0.07);
+            osc.stop(this.ctx.currentTime + idx * 0.07 + 0.22);
+          });
+        } catch (e) {}
+      }
+
+      playWrong() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(280, this.ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(130, this.ctx.currentTime + 0.28);
+          gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.28);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.28);
+        } catch (e) {}
+      }
+
+      playFanfare() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const melody = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+          melody.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.11);
+            gain.gain.setValueAtTime(0.24, this.ctx.currentTime + idx * 0.11);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.11 + 0.85);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + idx * 0.11);
+            osc.stop(this.ctx.currentTime + idx * 0.11 + 0.85);
+          });
+        } catch (e) {}
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    /* ==========================================================
+       2. Canvas 축하 폭죽(Confetti) 애니메이션
+       ========================================================== */
+    class ConfettiEffect {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.particles = [];
+        this.animationId = null;
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      }
+
+      resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      }
+
+      start() {
+        this.particles = [];
+        const colors = ['#F59E0B', '#FB923C', '#F43F5E', '#10B981', '#38BDF8', '#8B5CF6', '#FBBF24'];
+        for (let i = 0; i < 120; i++) {
+          this.particles.push({
+            x: this.canvas.width / 2,
+            y: this.canvas.height / 2,
+            vx: (Math.random() - 0.5) * 22,
+            vy: (Math.random() - 0.7) * 22,
+            size: Math.random() * 8 + 5,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rSpeed: (Math.random() - 0.5) * 14,
+            gravity: 0.35,
+            opacity: 1
+          });
+        }
+        if (!this.animationId) this.animate();
+      }
+
+      animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.particles.forEach((p, idx) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.rotation += p.rSpeed;
+          p.opacity -= 0.007;
+
+          this.ctx.save();
+          this.ctx.globalAlpha = Math.max(0, p.opacity);
+          this.ctx.translate(p.x, p.y);
+          this.ctx.rotate((p.rotation * Math.PI) / 180);
+          this.ctx.fillStyle = p.color;
+          this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          this.ctx.restore();
+
+          if (p.opacity <= 0 || p.y > this.canvas.height) {
+            this.particles.splice(idx, 1);
+          }
+        });
+
+        if (this.particles.length > 0) {
+          this.animationId = requestAnimationFrame(() => this.animate());
+        } else {
+          cancelAnimationFrame(this.animationId);
+          this.animationId = null;
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+      }
+    }
+
+    /* ==========================================================
+       3. 한글 유니코드 분해 알고리즘 (초성 추출 엔진)
+       ========================================================== */
+    const CHOSUNG_LIST = [
+      'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ',
+      'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+    ];
+
+    /**
+     * 한글 문자열에서 초성 배열을 추출하는 함수
+     * @param {string} word - 검사할 단어 (예: "가방")
+     * @returns {string|null} - 추출된 초성 문자열 (예: "ㄱㅂ") 또는 유효하지 않을 시 null
+     */
+    function extractChosung(word) {
+      if (!word || typeof word !== 'string') return null;
+      const cleanWord = word.trim().replace(/\s+/g, '');
+      let result = '';
+
+      for (let i = 0; i < cleanWord.length; i++) {
+        const code = cleanWord.charCodeAt(i);
+        // 한글 완성형 음절 범위 (가: 0xAC00 ~ 힣: 0xD7A3)
+        if (code >= 0xAC00 && code <= 0xD7A3) {
+          const chosungIndex = Math.floor((code - 0xAC00) / 588);
+          result += CHOSUNG_LIST[chosungIndex];
+        } else {
+          // 한글 완성형 음절이 아닌 문자가 포함된 경우(숫자, 특수문자, 영문 등)
+          return null;
+        }
+      }
+      return result;
+    }
+
+    /* ==========================================================
+       4. 초등 4~6학년 초성 퀴즈 데이터베이스 (35종)
+       ========================================================== */
+    const CHOSUNG_DATABASE = [
+      {
+        id: 1,
+        chosung: "ㄱ ㅂ",
+        raw: "ㄱㅂ",
+        charCount: 2,
+        category: "학교와 일상 생활",
+        hint: "등교할 때 메는 물건, 소풍 도시락으로 먹는 맛있는 음식, 고기 부위 등을 떠올려 보세요!",
+        examples: ["가방", "김밥", "국밥", "갈비", "곰발", "거북", "각본", "가발"]
+      },
+      {
+        id: 2,
+        chosung: "ㅅ ㅁ",
+        raw: "ㅅㅁ",
+        charCount: 2,
+        category: "마음과 일상",
+        hint: "생일날 친구에게 주고받는 것, 아침마다 소식을 전하는 종이, 모래가 가득한 땅 등을 생각해 보세요!",
+        examples: ["선물", "신문", "사막", "소망", "사물", "수목", "실물", "설명"]
+      },
+      {
+        id: 3,
+        chosung: "ㅂ ㄹ",
+        raw: "ㅂㄹ",
+        charCount: 2,
+        category: "자연과 보물",
+        hint: "살랑살랑 시원하게 부는 것, 꼭꼭 숨겨진 귀한 물건, 보라색 꽃, 풀숲에 사는 작은 곤충 등!",
+        examples: ["바람", "보물", "보라", "벌레", "볼펜", "비료", "발목", "배려"]
+      },
+      {
+        id: 4,
+        chosung: "ㅎ ㄴ",
+        raw: "ㅎㄴ",
+        charCount: 2,
+        category: "자연과 우리말",
+        hint: "파랗고 구름이 떠다니는 곳, 숫자 1을 뜻하는 순우리말, 남을 흉내 내는 행동 등을 떠올려 보세요!",
+        examples: ["하늘", "하나", "한낮", "흉내", "해녀", "효녀", "한눈", "호남"]
+      },
+      {
+        id: 5,
+        chosung: "ㅇ ㅅ",
+        raw: "ㅇㅅ",
+        charCount: 2,
+        category: "생활과 지혜",
+        hint: "비 올 때 쓰는 물건, 아픈 사람을 치료하는 직업, 지나온 옛 이야기(과거) 등을 생각해보세요!",
+        examples: ["우산", "의사", "역사", "약속", "여우", "예절", "야수", "연습"]
+      },
+      {
+        id: 6,
+        chosung: "ㅊ ㄱ",
+        raw: "ㅊㄱ",
+        charCount: 2,
+        category: "학교와 운동",
+        hint: "교실에서 함께 공부하고 어울리는 사람, 발로 공을 차는 스포츠, 물건을 보관해두는 곳 등!",
+        examples: ["친구", "축구", "창고", "치과", "칠교", "체격", "철교", "초과"]
+      },
+      {
+        id: 7,
+        chosung: "ㄷ ㅁ",
+        raw: "ㄷㅁ",
+        charCount: 2,
+        category: "자연과 가정",
+        hint: "사람과 함께 지구에 살아가는 생명체, 집으로 들어가는 큰 문, 요리할 때 칼질하는 받침대 등!",
+        examples: ["동물", "대문", "도마", "두목", "단맛", "동맥", "동문", "두메"]
+      },
+      {
+        id: 8,
+        chosung: "ㄱ ㅅ",
+        raw: "ㄱㅅ",
+        charCount: 2,
+        category: "학교와 마음",
+        hint: "선생님과 공부하는 공간, 고마운 마음을 전하는 말, 쉬는 시간에 먹는 맛있는 음식 등!",
+        examples: ["교실", "감사", "간식", "거실", "국사", "강산", "광산", "기상"]
+      },
+      {
+        id: 9,
+        chosung: "ㅂ ㅎ",
+        raw: "ㅂㅎ",
+        charCount: 2,
+        category: "학교와 과학",
+        hint: "여름과 겨울에 기다려지는 긴 휴식 시간, 전화기나 출석부의 숫자, 모습이 달라지는 것 등!",
+        examples: ["방학", "번호", "변화", "비행", "부호", "백합", "부화", "방향"]
+      },
+      {
+        id: 10,
+        chosung: "ㅈ ㅎ",
+        raw: "ㅈㅎ",
+        charCount: 2,
+        category: "생활과 색깔",
+        hint: "멀리 있는 사람과 목소리로 대화하는 기기, 빨강과 노랑 사이의 색깔, 틀림없이 바른 상태 등!",
+        examples: ["전화", "주황", "정확", "조화", "장학", "집회", "지혜", "진화"]
+      },
+      {
+        id: 11,
+        chosung: "ㅅ ㅎ",
+        raw: "ㅅㅎ",
+        charCount: 2,
+        category: "교과와 일상",
+        hint: "학교에서 배우는 국어·도덕·우리 공동체 과목, 실력을 확인하는 평가, 사람들의 삶의 터전 등!",
+        examples: ["사회", "시험", "생활", "수학", "신화", "상황", "소환", "순환"]
+      },
+      {
+        id: 12,
+        chosung: "ㅁ ㄹ",
+        raw: "ㅁㄹ",
+        charCount: 2,
+        category: "시간과 신체",
+        hint: "앞으로 다가올 시간, 생각하는 뇌가 있는 신체 부위, 바닷가 백사장에 있는 부드러운 가루 등!",
+        examples: ["미래", "머리", "모래", "마루", "미로", "마력", "만료", "무량"]
+      },
+      {
+        id: 13,
+        chosung: "ㄴ ㅂ",
+        raw: "ㄴㅂ",
+        charCount: 2,
+        category: "자연과 주방",
+        hint: "꽃밭을 훨훨 날아다니는 곤충, 찌개나 라면을 끓이는 주방 도구, 겨울철 실내를 따뜻하게 덥히는 것 등!",
+        examples: ["나비", "냄비", "난방", "남북", "눈빛", "남반", "녹봉", "납부"]
+      },
+      {
+        id: 14,
+        chosung: "ㅎ ㄱ",
+        raw: "ㅎㄱ",
+        charCount: 2,
+        category: "사회와 나라",
+        hint: "매일 아침 공부하러 가는 곳, 우리가 자랑스럽게 살아가는 조국, 세종대왕님이 만드신 우리 글자 등!",
+        examples: ["학교", "한국", "한글", "황금", "환경", "한강", "호각", "해군"]
+      },
+      {
+        id: 15,
+        chosung: "ㅍ ㄹ",
+        raw: "ㅍㄹ",
+        charCount: 2,
+        category: "음악과 색깔",
+        hint: "입으로 불어 삐익 소리를 내는 악기, 맑은 하늘이나 바다의 짙은 색, 바람이 불어 생기는 힘 등!",
+        examples: ["피리", "파랑", "풍력", "파란", "표류", "피력", "폭력", "포로"]
+      },
+      {
+        id: 16,
+        chosung: "ㄱ ㄹ",
+        raw: "ㄱㄹ",
+        charCount: 2,
+        category: "자연과 동물",
+        hint: "도화지에 크레파스로 그리는 것, 하늘에 둥둥 떠 있는 솜뭉치, 목이 아주 긴 초식 동물 등!",
+        examples: ["그림", "구름", "기린", "고래", "거리", "계란", "가락", "가루"]
+      },
+      {
+        id: 17,
+        chosung: "ㅇ ㅂ",
+        raw: "ㅇㅂ",
+        charCount: 2,
+        category: "가정과 생활",
+        hint: "밤에 잠잘 때 포근하게 덮는 침구, 머리를 단정하게 깎는 일, 집안에서 가장 중심이 되는 큰 방 등!",
+        examples: ["이불", "이발", "안방", "양반", "입법", "인분", "암벽", "어버"]
+      },
+      {
+        id: 18,
+        chosung: "ㅈ ㄱ",
+        raw: "ㅈㄱ",
+        charCount: 2,
+        category: "사회와 도구",
+        hint: "우리가 살고 있는 푸른 행성, 추운 겨울 손에 끼는 방한 도구, 돈과 카드를 넣어 다니는 휴대품 등!",
+        examples: ["지구", "장갑", "지갑", "조각", "조건", "직업", "정거", "절약"]
+      },
+      {
+        id: 19,
+        chosung: "ㅌ ㅎ",
+        raw: "ㅌㅎ",
+        charCount: 2,
+        category: "학교와 소통",
+        hint: "전화기로 목소리를 주고받는 일, 아침저녁으로 집과 학교를 오가는 일, 여러 개를 하나로 합치는 것 등!",
+        examples: ["통화", "통학", "통합", "퇴학", "통행", "탄환", "탈환", "토해"]
+      },
+      {
+        id: 20,
+        chosung: "ㅅ ㅅ",
+        raw: "ㅅㅅ",
+        charCount: 2,
+        category: "동물과 사람들",
+        hint: "머리에 멋진 뿔이 달린 초식 동물, 도서관에서 책을 관리하는 분, 경기에서 뛰는 플레이어 등!",
+        examples: ["사슴", "사서", "선수", "세상", "스승", "선생", "상상", "사실"]
+      },
+      {
+        id: 21,
+        chosung: "ㄱ ㅈ",
+        raw: "ㄱㅈ",
+        charCount: 2,
+        category: "가정과 음식",
+        hint: "부모님과 형제자매가 모인 우리 식구, 바삭바삭 간식으로 먹는 군것질거리, 국을 뜰 때 쓰는 도구 등!",
+        examples: ["가족", "과자", "국자", "공주", "극장", "기자", "계절", "공책"]
+      },
+      {
+        id: 22,
+        chosung: "ㄷ ㄹ",
+        raw: "ㄷㄹ",
+        charCount: 2,
+        category: "신체와 교통",
+        hint: "사람이 걷거나 달릴 때 쓰는 신체 부위, 자동차가 씽씽 달리는 길, 날짜와 달이 적힌 종이 판 등!",
+        examples: ["다리", "도로", "달력", "도련", "두릅", "도락", "두려", "달리기"]
+      },
+      {
+        id: 23,
+        chosung: "ㅂ ㅅ",
+        raw: "ㅂㅅ",
+        charCount: 2,
+        category: "교통과 자연",
+        hint: "많은 승객이 함께 타는 대중교통, 땅속에서 캐낸 반짝이는 귀한 돌, 물줄기가 하늘로 솟구치는 시설 등!",
+        examples: ["버스", "보석", "분수", "박수", "변신", "백성", "복습", "배속"]
+      },
+      {
+        id: 24,
+        chosung: "ㅇ ㅈ",
+        raw: "ㅇㅈ",
+        charCount: 2,
+        category: "가구와 과학",
+        hint: "책상 앞에 편하게 앉는 가구, 별과 은하수가 가득 찬 무한한 공간, 사진을 끼워두는 네모난 틀 등!",
+        examples: ["의자", "우주", "액자", "안전", "온정", "애정", "엔진", "열정"]
+      },
+      {
+        id: 25,
+        chosung: "ㅈ ㅇ",
+        raw: "ㅈㅇ",
+        charCount: 2,
+        category: "자연과 학습",
+        hint: "산과 들, 강과 바다 같은 푸른 세상, 글씨를 쓰고 그림을 그리는 펄프 종이, 풀과 꽃을 가꾸는 마당 등!",
+        examples: ["자연", "종이", "정원", "자유", "중앙", "조약", "주역", "장애"]
+      },
+      {
+        id: 26,
+        chosung: "ㅊ ㄹ",
+        raw: "ㅊㄹ",
+        charCount: 2,
+        category: "색깔과 과학",
+        hint: "새싹과 나뭇잎의 싱그러운 색, 기차가 달리는 쇠 레일, 자동차나 버스 같은 바퀴 달린 탈것 등!",
+        examples: ["초록", "철로", "차량", "청렴", "침략", "찰흙", "출력", "체류"]
+      },
+      {
+        id: 27,
+        chosung: "ㅋ ㄷ",
+        raw: "ㅋㄷ",
+        charCount: 2,
+        category: "생활과 미래",
+        hint: "버스 탈 때 삑 찍는 교통 수단, 컴퓨터에 명령을 내리는 프로그래밍 작업 등!",
+        examples: ["카드", "코딩", "캐디", "키득", "코딱", "카단", "콩닭"]
+      },
+      {
+        id: 28,
+        chosung: "ㅌ ㅈ",
+        raw: "ㅌㅈ",
+        charCount: 2,
+        category: "추리와 경제",
+        hint: "단서를 찾아 수수께끼를 푸는 멋진 사람, 은행에서 돈을 저축하는 종이 통장, 어떤 사물만의 특별한 점 등!",
+        examples: ["탐정", "통장", "특징", "퇴장", "팀장", "통제", "타자", "투자"]
+      },
+      {
+        id: 29,
+        chosung: "ㅍ ㄷ",
+        raw: "ㅍㄷ",
+        charCount: 2,
+        category: "자연과 과일",
+        hint: "바닷가에서 철썩이며 밀려오는 물결, 송이송이 달콤하게 열리는 보라색 과일, 옳고 그름을 가리는 생각 등!",
+        examples: ["파도", "포도", "판단", "풍등", "판도", "풍동", "포대", "폭도"]
+      },
+      {
+        id: 30,
+        chosung: "ㅎ ㅁ",
+        raw: "ㅎㅁ",
+        charCount: 2,
+        category: "동물과 마음",
+        hint: "물속에 살며 입이 아주 큰 거대한 동물, 가슴속에 품은 밝은 내일의 꿈, 가족끼리 다정하고 화목한 모습 등!",
+        examples: ["하마", "희망", "해마", "화목", "항목", "후문", "할미", "흑막"]
+      },
+      {
+        id: 31,
+        chosung: "ㄱ ㅎ",
+        raw: "ㄱㅎ",
+        charCount: 2,
+        category: "과학과 사회",
+        hint: "원리와 실험을 탐구하는 교과목, 비행기를 타고 내리는 터미널, 내가 태어나고 자란 정든 곳 등!",
+        examples: ["과학", "공항", "고향", "기회", "교회", "국회", "결합", "광화"]
+      },
+      {
+        id: 32,
+        chosung: "ㅅ ㄱ",
+        raw: "ㅅㄱ",
+        charCount: 2,
+        category: "과일과 생활",
+        hint: "빨갛고 아삭아삭 맛있는 과일, 하루를 분과 초로 나누는 단위, 얼굴이나 손을 씻고 닦는 보송한 천 등!",
+        examples: ["사과", "시간", "수건", "소금", "시계", "사고", "세금", "세계"]
+      },
+      {
+        id: 33,
+        chosung: "ㅂ ㄱ",
+        raw: "ㅂㄱ",
+        charCount: 2,
+        category: "체육과 자연",
+        hint: "네트를 사이에 두고 손으로 공을 넘기는 스포츠, 번쩍이며 우르릉 치는 것, 방과 후에 하는 활동 등!",
+        examples: ["배구", "번개", "방과", "비극", "보관", "발견", "백과", "북극"]
+      },
+      {
+        id: 34,
+        chosung: "ㅈ ㅂ",
+        raw: "ㅈㅂ",
+        charCount: 2,
+        category: "가정과 생물",
+        hint: "봄을 알리며 처마 밑에 둥지를 트는 철새, 맛있는 요리를 만드는 요리 공간, 살림을 맡아 돌보는 어른 등!",
+        examples: ["제비", "주방", "주부", "정보", "지방", "정부", "족보", "조부"]
+      },
+      {
+        id: 35,
+        chosung: "ㅌ ㄱ",
+        raw: "ㅌㄱ",
+        charCount: 2,
+        category: "나라와 스포츠",
+        hint: "우리나라 국기인 태극기, 작은 라켓과 탁자에서 치는 탁구, 하루 일과를 마치고 집으로 돌아가는 것 등!",
+        examples: ["태극", "탁구", "퇴근", "특급", "투구", "탄광", "탈곡", "통곡"]
+      }
+    ];
+
+    /* ==========================================================
+       5. 퀴즈 게임 상태 관리 객체
+       ========================================================== */
+    const TARGET_QUESTIONS = 10;
+
+    const GameState = {
+      avatar: '🦊',
+      score: 0,              // 맞힌 문제 수 (0~10)
+      startTime: null,
+      currentProblem: null,
+      pool: [],
+      masteredRecords: [],   // 맞힌 10문제의 초성과 작성 단어 3개 기록
+      isLocked: false
+    };
+
+    // DOM 캐시
+    const startScreen = document.getElementById('startScreen');
+    const quizScreen = document.getElementById('quizScreen');
+    const roundSuccessModal = document.getElementById('roundSuccessModal');
+    const finalSuccessScreen = document.getElementById('finalSuccessScreen');
+
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    const headerScoreBadge = document.getElementById('headerScoreBadge');
+
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    const playerAvatar = document.getElementById('playerAvatar');
+    const currentScoreNum = document.getElementById('currentScoreNum');
+    const progressCheer = document.getElementById('progressCheer');
+    const quizProgressBar = document.getElementById('quizProgressBar');
+    const scoreNodesContainer = document.getElementById('scoreNodesContainer');
+
+    const categoryBadge = document.getElementById('categoryBadge');
+    const charCountBadge = document.getElementById('charCountBadge');
+    const bigChosungDisplay = document.getElementById('bigChosungDisplay');
+
+    const hintToggleBtn = document.getElementById('hintToggleBtn');
+    const hintContentBox = document.getElementById('hintContentBox');
+    const hintText = document.getElementById('hintText');
+
+    const wordAnswerForm = document.getElementById('wordAnswerForm');
+    const wordInput1 = document.getElementById('wordInput1');
+    const wordInput2 = document.getElementById('wordInput2');
+    const wordInput3 = document.getElementById('wordInput3');
+    const word1Status = document.getElementById('word1Status');
+    const word2Status = document.getElementById('word2Status');
+    const word3Status = document.getElementById('word3Status');
+    const submitWordsBtn = document.getElementById('submitWordsBtn');
+
+    const validationAlertBanner = document.getElementById('validationAlertBanner');
+    const validationAlertText = document.getElementById('validationAlertText');
+    const closeAlertBtn = document.getElementById('closeAlertBtn');
+
+    // 모달 요소
+    const roundSuccessTitle = document.getElementById('roundSuccessTitle');
+    const roundChosungTag = document.getElementById('roundChosungTag');
+    const roundAnswerWordsDisplay = document.getElementById('roundAnswerWordsDisplay');
+    const roundExampleWordsText = document.getElementById('roundExampleWordsText');
+    const modalNextQuestionBtn = document.getElementById('modalNextQuestionBtn');
+    const modalNextBtnText = document.getElementById('modalNextBtnText');
+
+    // 최종 화면 요소
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const confetti = new ConfettiEffect(confettiCanvas);
+    const finalElapsedTime = document.getElementById('finalElapsedTime');
+    const restartChallengeBtn = document.getElementById('restartChallengeBtn');
+    const toggleWordDictionaryBtn = document.getElementById('toggleWordDictionaryBtn');
+    const wordDictionaryContainer = document.getElementById('wordDictionaryContainer');
+    const wordDictionaryList = document.getElementById('wordDictionaryList');
+
+    /* 배열 셔플 함수 */
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /* 10단계 인디케이터 구슬 초기화 */
+    function initScoreNodes() {
+      scoreNodesContainer.innerHTML = '';
+      for (let i = 1; i <= TARGET_QUESTIONS; i++) {
+        const node = document.createElement('div');
+        node.id = `scoreNode_${i}`;
+        node.className = `flex flex-col items-center justify-center py-1 rounded-xl border transition-all text-xs font-black ${
+          i <= GameState.score 
+            ? 'bg-orange-500 border-orange-600 text-white shadow-sm scale-105' 
+            : 'bg-white border-slate-200 text-slate-400'
+        }`;
+        node.innerHTML = `
+          <span class="text-xs md:text-sm">${i <= GameState.score ? '⭐' : '⚪'}</span>
+          <span class="text-[9px] md:text-[10px] mt-0.5">${i}</span>
+        `;
+        scoreNodesContainer.appendChild(node);
+      }
+    }
+
+    /* 진행도 UI 업데이트 */
+    function updateProgressUI() {
+      currentScoreNum.textContent = GameState.score;
+      headerScoreBadge.textContent = `${GameState.score} / ${TARGET_QUESTIONS}`;
+
+      const percent = (GameState.score / TARGET_QUESTIONS) * 100;
+      quizProgressBar.style.width = `${percent}%`;
+
+      // 인디케이터 구슬 갱신
+      for (let i = 1; i <= TARGET_QUESTIONS; i++) {
+        const node = document.getElementById(`scoreNode_${i}`);
+        if (!node) continue;
+        if (i <= GameState.score) {
+          node.className = 'flex flex-col items-center justify-center py-1 rounded-xl border border-orange-600 bg-orange-500 text-white shadow-sm scale-105 transition-all';
+          node.innerHTML = `<span class="text-xs md:text-sm">⭐</span><span class="text-[9px] md:text-[10px] mt-0.5 font-bold">${i}</span>`;
+        } else {
+          node.className = 'flex flex-col items-center justify-center py-1 rounded-xl border border-slate-200 bg-white text-slate-400 transition-all';
+          node.innerHTML = `<span class="text-xs md:text-sm">⚪</span><span class="text-[9px] md:text-[10px] mt-0.5">${i}</span>`;
+        }
+      }
+
+      // 응원 문구 변경
+      if (GameState.score === 0) {
+        progressCheer.textContent = '10문제 정답을 향해 출발! 🚀';
+        progressCheer.className = 'text-xs font-extrabold text-slate-700 bg-slate-100 border border-slate-300 px-2.5 py-1 rounded-full';
+      } else if (GameState.score <= 3) {
+        progressCheer.textContent = `좋은 시작! ⭐ ${GameState.score}문제 완료!`;
+        progressCheer.className = 'text-xs font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-full';
+      } else if (GameState.score <= 6) {
+        progressCheer.textContent = `절반 돌파! 🔥 ${GameState.score}문제 완료!`;
+        progressCheer.className = 'text-xs font-extrabold text-orange-800 bg-orange-100 border border-orange-300 px-2.5 py-1 rounded-full';
+      } else if (GameState.score <= 8) {
+        progressCheer.textContent = `거의 다 왔어요! 🎯 ${GameState.score}/10 달성!`;
+        progressCheer.className = 'text-xs font-extrabold text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-full animate-gentleBounce';
+      } else if (GameState.score === 9) {
+        progressCheer.textContent = `마지막 1문제! 마스터 등극 직전! 👑`;
+        progressCheer.className = 'text-xs font-extrabold text-amber-900 bg-amber-200 border border-amber-400 px-2.5 py-1 rounded-full animate-pulse';
+      }
+    }
+
+    /* 다음 무작위 문제 불러오기 */
+    function getNextProblem() {
+      if (GameState.pool.length === 0) {
+        GameState.pool = shuffleArray(CHOSUNG_DATABASE);
+      }
+      return GameState.pool.pop();
+    }
+
+    /* 문제 화면 로드 */
+    function loadProblem() {
+      GameState.isLocked = false;
+      validationAlertBanner.classList.add('hidden');
+      hintContentBox.classList.add('hidden');
+
+      // 입력창 초기화
+      [wordInput1, wordInput2, wordInput3].forEach(inp => {
+        inp.value = '';
+        inp.disabled = false;
+        inp.classList.remove('border-emerald-500', 'border-rose-400', 'bg-emerald-50', 'bg-rose-50');
+        inp.classList.add('border-slate-300', 'bg-white');
+      });
+
+      word1Status.textContent = '대기 중';
+      word1Status.className = 'text-[10px] text-slate-400';
+      word2Status.textContent = '대기 중';
+      word2Status.className = 'text-[10px] text-slate-400';
+      word3Status.textContent = '대기 중';
+      word3Status.className = 'text-[10px] text-slate-400';
+
+      GameState.currentProblem = getNextProblem();
+      const p = GameState.currentProblem;
+
+      categoryBadge.textContent = p.category;
+      charCountBadge.textContent = `${p.charCount}글자 단어 3개`;
+      hintText.textContent = p.hint;
+
+      // 대형 초성 블록 렌더링
+      bigChosungDisplay.innerHTML = '';
+      const parts = p.chosung.split(' ');
+      parts.forEach(ch => {
+        const box = document.createElement('div');
+        box.className = 'w-16 h-20 md:w-20 md:h-24 bg-gradient-to-b from-orange-400 to-amber-500 text-white font-title text-4xl md:text-5xl rounded-3xl shadow-lg border-4 border-amber-200 flex items-center justify-center transform transition hover:scale-105';
+        box.textContent = ch;
+        bigChosungDisplay.appendChild(box);
+      });
+
+      updateProgressUI();
+
+      // 첫 번째 입력창으로 자동 포커스
+      setTimeout(() => {
+        wordInput1.focus();
+      }, 100);
+    }
+
+    /* 3개 단어 유효성 검사 및 정답 판정 */
+    function validateAnswers() {
+      if (GameState.isLocked) return;
+
+      const w1 = wordInput1.value.trim();
+      const w2 = wordInput2.value.trim();
+      const w3 = wordInput3.value.trim();
+
+      // 1. 공백 및 필수 입력 체크
+      if (!w1 || !w2 || !w3) {
+        showValidationAlert("단어 3개를 빈칸 없이 모두 입력해주세요! ✍️");
+        if (!w1) wordInput1.focus();
+        else if (!w2) wordInput2.focus();
+        else wordInput3.focus();
+        sound.playWrong();
+        return;
+      }
+
+      // 2. 글자 수 체크
+      const p = GameState.currentProblem;
+      const inputs = [
+        { text: w1, el: wordInput1, status: word1Status, index: 1 },
+        { text: w2, el: wordInput2, status: word2Status, index: 2 },
+        { text: w3, el: wordInput3, status: word3Status, index: 3 }
+      ];
+
+      for (let item of inputs) {
+        if (item.text.length !== p.charCount) {
+          showValidationAlert(`${item.index}번째 단어 '${item.text}'은(는) ${p.charCount}글자가 아니에요!`);
+          item.el.focus();
+          item.el.select();
+          sound.playWrong();
+          return;
+        }
+      }
+
+      // 3. 중복 단어 입력 체크 (동일 단어 금지)
+      if (w1 === w2 || w2 === w3 || w1 === w3) {
+        showValidationAlert("서로 다른 3개의 단어를 적어야 해요! (중복 단어 발견)");
+        sound.playWrong();
+        return;
+      }
+
+      // 4. 초성 일치 여부 판정
+      const targetChosung = p.raw; // 공백 없는 초성 문자열 (예: "ㄱㅂ")
+      let hasError = false;
+
+      inputs.forEach(item => {
+        const extracted = extractChosung(item.text);
+        if (!extracted) {
+          showValidationAlert(`${item.index}번째 단어에 올바른 한글 완성형 단어를 적어주세요!`);
+          item.el.classList.remove('border-slate-300', 'bg-white');
+          item.el.classList.add('border-rose-400', 'bg-rose-50');
+          item.status.textContent = '한글 오류';
+          item.status.className = 'text-[10px] text-rose-500 font-bold';
+          hasError = true;
+        } else if (extracted !== targetChosung) {
+          showValidationAlert(`${item.index}번째 단어 '${item.text}'의 초성은 [${extracted}]으로, [${p.chosung}]과 달라요!`);
+          item.el.classList.remove('border-slate-300', 'bg-white');
+          item.el.classList.add('border-rose-400', 'bg-rose-50');
+          item.status.textContent = '초성 불일치';
+          item.status.className = 'text-[10px] text-rose-500 font-bold';
+          hasError = true;
+        } else {
+          item.el.classList.remove('border-slate-300', 'border-rose-400', 'bg-rose-50');
+          item.el.classList.add('border-emerald-500', 'bg-emerald-50');
+          item.status.textContent = '초성 일치 ✅';
+          item.status.className = 'text-[10px] text-emerald-600 font-bold';
+        }
+      });
+
+      if (hasError) {
+        sound.playWrong();
+        return;
+      }
+
+      // 모든 검증 통과 -> 정답 처리!
+      handleCorrectRound(w1, w2, w3);
+    }
+
+    /* 오류 알림 메시지 띄우기 */
+    function showValidationAlert(msg) {
+      validationAlertText.textContent = msg;
+      validationAlertBanner.classList.remove('hidden');
+    }
+
+    /* 정답 맞힘 처리 */
+    function handleCorrectRound(w1, w2, w3) {
+      GameState.isLocked = true;
+      sound.playCorrect();
+      validationAlertBanner.classList.add('hidden');
+
+      GameState.score++;
+      updateProgressUI();
+
+      // 기록에 저장
+      const p = GameState.currentProblem;
+      GameState.masteredRecords.push({
+        roundNum: GameState.score,
+        chosung: p.chosung,
+        words: [w1, w2, w3],
+        category: p.category
+      });
+
+      const isFinalWin = GameState.score >= TARGET_QUESTIONS;
+
+      // 모달 내용 세팅
+      roundChosungTag.textContent = `초성: ${p.chosung}`;
+      roundSuccessTitle.textContent = isFinalWin 
+        ? "대단해요! 마지막 10번째 문제 통과!" 
+        : `훌륭해요! (${GameState.score} / 10 달성)`;
+
+      roundAnswerWordsDisplay.innerHTML = `
+        <span class="bg-white border border-emerald-300 text-emerald-800 px-3 py-1 rounded-xl shadow-sm">1. ${w1}</span>
+        <span class="bg-white border border-emerald-300 text-emerald-800 px-3 py-1 rounded-xl shadow-sm">2. ${w2}</span>
+        <span class="bg-white border border-emerald-300 text-emerald-800 px-3 py-1 rounded-xl shadow-sm">3. ${w3}</span>
+      `;
+
+      // 예시 단어 5개 추출
+      const filteredExamples = p.examples.filter(ex => ![w1, w2, w3].includes(ex)).slice(0, 5);
+      roundExampleWordsText.textContent = filteredExamples.join(', ') || p.examples.slice(0, 5).join(', ');
+
+      if (isFinalWin) {
+        modalNextBtnText.textContent = "🏆 10문제 달성 성공 축하 보기!";
+      } else {
+        modalNextBtnText.textContent = "다음 초성 문제로 가기";
+      }
+
+      roundSuccessModal.classList.remove('hidden');
+    }
+
+    /* 10문제 완성 대성공 화면 표시 */
+    function showFinalSuccessScreen() {
+      sound.playFanfare();
+      confetti.start();
+
+      quizScreen.classList.add('hidden');
+      roundSuccessModal.classList.add('hidden');
+      finalSuccessScreen.classList.remove('hidden');
+
+      // 소요 시간 계산
+      const diffSec = Math.floor((Date.now() - GameState.startTime) / 1000);
+      const mins = String(Math.floor(diffSec / 60)).padStart(2, '0');
+      const secs = String(diffSec % 60).padStart(2, '0');
+      finalElapsedTime.textContent = `${mins}:${secs}`;
+
+      // 30단어 사전 렌더링
+      wordDictionaryList.innerHTML = '';
+      GameState.masteredRecords.forEach(rec => {
+        const item = document.createElement('div');
+        item.className = 'p-3 rounded-2xl bg-white border border-amber-200 shadow-sm';
+        item.innerHTML = `
+          <div class="font-bold text-slate-800 flex items-center justify-between mb-1">
+            <span class="text-sm font-title text-orange-600">문제 ${rec.roundNum}. 초성 [ ${rec.chosung} ]</span>
+            <span class="text-[11px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md">${rec.category}</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mt-1">
+            ${rec.words.map(w => `<span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded-lg font-bold">${w}</span>`).join('')}
+          </div>
+        `;
+        wordDictionaryList.appendChild(item);
+      });
+    }
+
+    /* ==========================================================
+       6. UI 이벤트 리스너 바인딩
+       ========================================================== */
+
+    // 소리 켜기/끄기 토글
+    soundToggleBtn.addEventListener('click', () => {
+      sound.init();
+      sound.enabled = !sound.enabled;
+      soundIcon.textContent = sound.enabled ? '🔊' : '🔇';
+      soundToggleBtn.classList.toggle('opacity-50', !sound.enabled);
+    });
+
+    // 아바타 선택
+    document.querySelectorAll('.avatar-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sound.init();
+        sound.playClick();
+        document.querySelectorAll('.avatar-btn').forEach(b => {
+          b.classList.remove('border-orange-500', 'bg-orange-50', 'shadow-sm');
+          b.classList.add('border-slate-200', 'bg-slate-50');
+        });
+        btn.classList.remove('border-slate-200', 'bg-slate-50');
+        btn.classList.add('border-orange-500', 'bg-orange-50', 'shadow-sm');
+        GameState.avatar = btn.getAttribute('data-avatar');
+      });
+    });
+
+    // 힌트 토글
+    hintToggleBtn.addEventListener('click', () => {
+      sound.playClick();
+      hintContentBox.classList.toggle('hidden');
+    });
+
+    // 경고 닫기
+    closeAlertBtn.addEventListener('click', () => {
+      validationAlertBanner.classList.add('hidden');
+    });
+
+    // 키보드 엔터 키 인터랙션: 다음 칸 이동 & 마지막 칸 제출
+    wordInput1.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sound.init();
+        if (wordInput1.value.trim()) wordInput2.focus();
+      }
+    });
+
+    wordInput2.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sound.init();
+        if (wordInput2.value.trim()) wordInput3.focus();
+      }
+    });
+
+    wordInput3.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sound.init();
+        validateAnswers();
+      }
+    });
+
+    // 폼 제출 버튼
+    wordAnswerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      sound.init();
+      validateAnswers();
+    });
+
+    // 모달 확인 후 다음 문제
+    modalNextQuestionBtn.addEventListener('click', () => {
+      sound.playClick();
+      roundSuccessModal.classList.add('hidden');
+
+      if (GameState.score >= TARGET_QUESTIONS) {
+        showFinalSuccessScreen();
+      } else {
+        loadProblem();
+      }
+    });
+
+    // 퀴즈 시작 버튼
+    startQuizBtn.addEventListener('click', () => {
+      sound.init();
+      sound.playClick();
+
+      GameState.score = 0;
+      GameState.startTime = Date.now();
+      GameState.pool = shuffleArray(CHOSUNG_DATABASE);
+      GameState.masteredRecords = [];
+      playerAvatar.textContent = GameState.avatar;
+
+      initScoreNodes();
+      startScreen.classList.add('hidden');
+      finalSuccessScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+
+      loadProblem();
+    });
+
+    // 다시 도전하기 버튼
+    restartChallengeBtn.addEventListener('click', () => {
+      sound.playClick();
+      finalSuccessScreen.classList.add('hidden');
+
+      GameState.score = 0;
+      GameState.startTime = Date.now();
+      GameState.pool = shuffleArray(CHOSUNG_DATABASE);
+      GameState.masteredRecords = [];
+
+      initScoreNodes();
+      updateProgressUI();
+      quizScreen.classList.remove('hidden');
+      loadProblem();
+    });
+
+    // 30단어 사전 토글
+    toggleWordDictionaryBtn.addEventListener('click', () => {
+      sound.playClick();
+      wordDictionaryContainer.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>
